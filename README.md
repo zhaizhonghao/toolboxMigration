@@ -22,18 +22,17 @@ Hence, we designed a toolbox to help developers automatically migrate their appl
 
 - Binding Mechanism
 
-  Integrating the EVM into the HLF platform results in two smart contract deployment methods on the HLF platform.  One is the smart
-  contract deployment method of the Ethereum platform, and the other is the smart contract deployment method of the HLF platform. On the Ethereum platform, any smart contract code of the blockchain-based application is allowed to be deployed without reviewing and testing. The platform relies on the gas fee mechanism to defend against the malicious codes (e.g., codes containing infinite loop) that may stall the platform. On the HLF platform, the gas fee mechanism is removed to reduce the application’s use-cost. The platform relies on mandatory code checks before deploying the smart contract to detect the malicious codes . Suppose the HLF platform integrates the EVM to support the application migration. In that case, attackers can bypass the code checks and inject the malicious codes into the HLF platform by selecting the smart contract deployment method of the Ethereum platform. Without the protection of the gas fee mechanism, any node in the HLF will be stalled by running the malicious codes, thereby destroying the application’s availability. To solve the problem, the toolbox will generates a chaincode and binds it with the migrated smart contract.
-
-  ![image-20221007092643929](C:\Users\desly\AppData\Roaming\Typora\typora-user-images\image-20221007092643929.png)
+  Integrating the EVM into the HLF platform results in two smart contract deployment methods on the HLF platform.  One is the smart contract deployment method of the Ethereum platform, and the other is the smart contract deployment method of the HLF platform. On the Ethereum platform, any smart contract code of the blockchain-based application is allowed to be deployed without reviewing and testing. The platform relies on the gas fee mechanism to defend against the malicious codes (e.g., codes containing infinite loop) that may stall the platform. On the HLF platform, the gas fee mechanism is removed to reduce the application’s use-cost. The platform relies on mandatory code checks before deploying the smart contract to detect the malicious codes. Suppose the HLF platform integrates the EVM to support the application migration. In that case, attackers can bypass the code checks and inject the malicious codes into the HLF platform by selecting the smart contract deployment method of the Ethereum platform. Without the protection of the gas fee mechanism, any node in the HLF will be stalled by running the malicious codes, thereby destroying the application’s availability. To solve the problem, the toolbox will generates a chaincode and binds it with the migrated smart contract.
+  
+![image-20221007092643929](C:\Users\desly\AppData\Roaming\Typora\typora-user-images\image-20221007092643929.png)
 
 ## Deploying the toolbox
 
-1. Bring up a permission blockchain network using HLF
+1. Bring up a permission blockchain network using HLF.
 
    Please refer to [using the fabric test network](https://hyperledger-fabric.readthedocs.io/en/latest/test_network.html) and [deploying a production network](https://hyperledger-fabric.readthedocs.io/en/latest/deployment_guide_overview.html#step-one-decide-on-your-network-configuration).
 
-2. Install and instantiate the EVM written in chaincode to the network
+2. Install and instantiate the EVM written in chaincode to the network.
 
    the EVM chaincode (evmcc) refer to the [emvcc](https://github.com/zhaizhonghao/toolbox_migration/blob/main/evmcc/evmcc.go). Below is an example of installation and instantiation through the peer cli.
 
@@ -60,9 +59,25 @@ Hence, we designed a toolbox to help developers automatically migrate their appl
    make Fab3
    ```
 
-   A binary named `fab3 ` will be created in the bin directory. 
+   A binary named `fab3 ` will be created in the bin directory.
    
    To use Fab3, the user needs to provide a Fabric SDK Config and Fabric user information. To specify the Fabric user, the organization and user id needs to be provided which corresponds to the credentials provided in the SDK config. We provide a sample [config](examples/first-network-sdk-config.yaml) that can be used with the first network example from the [fabric-samples](https://github.com/hyperledger/fabric-samples) repository. The credentials specified in the config, are expected to be in the directory format that the [cryptogen](https://hyperledger-fabric.readthedocs.io/en/release-1.4/commands/cryptogen.html) binary outputs.   
+   
+   Before running Fab3, the environment variables should be set as following:  
+   
+   ```shell
+   # Environment Variables for Fab3:
+   export FAB3_CONFIG=./first-network-sdk-config.yaml # Path to a compatible Fabric SDK Go config file
+   export FAB3_USER=User1 # User identity being used for the proxy (Matches the users names in the crypto-config directory specified in the config)
+   export FAB3_ORG=Org1  # Organization of the specified user
+   export FAB3_CHANNEL=basicchannel # Channel to be used for the transactions
+   export FAB3_CCID=evmcc # ID of the EVM Chaincode deployed in your fabric network. If not provided default is evmcc.
+   export FAB3_PORT=5000 # Port the proxy will listen on. If not provided default is 5000.
+   
+   ./fab3
+   ```
+   
+   
 
 ## Migrate the smart contract code
 
@@ -77,16 +92,75 @@ peer chaincode invoke -n evmcc -C <channel-name> -c '{"Args":["00000000000000000
 1. install the web3
 
    ```
-   npm install web3@0.20.2
+   npm install web3@0.20.21
    ```
 
 2. Invoke the migrated blockchain-based application deployed in the blockchain built by HLF
 
-   ```js
+   ```
    Web3 = require('web3')
    ...
    # port 5000 is exposed by the HLF blockchain network
    web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:5000'))
    ```
 
+   If successful you should be able to get your account address. 
+
+   ```
+    > web3.eth.accounts
+   ```
+
+   And you should see a single element array with your account address. In order to run any transactions web3 requires `web3.eth.defaultAccount` to be set
+
+   ```
+    > web3.eth.defaultAccount = web3.eth.accounts[0]
+   ```
+
+
+## Interacting with a previously  migrated Ethereum blockchain-based application
+
+The example is to migrate an application implemented based on a simple smart contract Storage written in Solidity version 0.4.0. The Storage smart contract allows anyone to store a single number in a variable by the set function allows anyone to read the value of the variable by the get function.
+
+   ```
+   > simpleStorageABI = [
+     	{
+     		"constant": false,
+     		"inputs": [
+     			{
+     				"name": "x",
+     				"type": "uint256"
+     			}
+     		],
+     		"name": "set",
+     		"outputs": [],
+     		"payable": false,
+     		"stateMutability": "nonpayable",
+     		"type": "function"
+     	},
+     	{
+     		"constant": true,
+     		"inputs": [],
+     		"name": "get",
+     		"outputs": [
+     			{
+     				"name": "",
+     				"type": "uint256"
+     			}
+     		],
+     		"payable": false,
+         "stateMutability": "view",
+         "type": "function"
+     	}
+     ]
+       > simpleStorageBytecode = '608060405234801561001057600080fd5b5060df8061001f6000396000f3006080604052600436106049576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff16806360fe47b114604e5780636d4ce63c146078575b600080fd5b348015605957600080fd5b5060766004803603810190808035906020019092919050505060a0565b005b348015608357600080fd5b50608a60aa565b6040518082815260200191505060405180910390f35b8060008190555050565b600080549050905600a165627a7a723058203dbaed52da8059a841ed6d7b484bf6fa6f61a7e975a803fdedf076a121a8c4010029'
    
+   > SimpleStorage = web3.eth.contract(simpleStorageABI)
+   
+   > deployedContract = SimpleStorage.new([], {data: simpleStorageBytecode})
+   > myContract = SimpleStorage.at(web3.eth.getTransactionReceipt(deployedContract.transactionHash).contractAddress)
+   > myContract = SimpleStorage.at(<contract-address>)
+   > myContract.set(10)
+   > myContract.get().toNumber()
+   ```
+
+  
