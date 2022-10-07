@@ -24,7 +24,10 @@ Hence, we designed a toolbox to help developers automatically migrate their appl
 
   Integrating the EVM into the HLF platform results in two smart contract deployment methods on the HLF platform.  One is the smart contract deployment method of the Ethereum platform, and the other is the smart contract deployment method of the HLF platform. On the Ethereum platform, any smart contract code of the blockchain-based application is allowed to be deployed without reviewing and testing. The platform relies on the gas fee mechanism to defend against the malicious codes (e.g., codes containing infinite loop) that may stall the platform. On the HLF platform, the gas fee mechanism is removed to reduce the application’s use-cost. The platform relies on mandatory code checks before deploying the smart contract to detect the malicious codes. Suppose the HLF platform integrates the EVM to support the application migration. In that case, attackers can bypass the code checks and inject the malicious codes into the HLF platform by selecting the smart contract deployment method of the Ethereum platform. Without the protection of the gas fee mechanism, any node in the HLF will be stalled by running the malicious codes, thereby destroying the application’s availability. To solve the problem, the toolbox will generates a chaincode and binds it with the migrated smart contract.
   
-![image-20221007092643929](C:\Users\desly\AppData\Roaming\Typora\typora-user-images\image-20221007092643929.png)
+
+![image](https://github.com/zhaizhonghao/toolbox_migration/tree/main/images/migration_process.png)
+
+## 
 
 ## Deploying the toolbox
 
@@ -77,27 +80,26 @@ Hence, we designed a toolbox to help developers automatically migrate their appl
    ./fab3
    ```
    
-   
 
 ## Migrate the smart contract code
 
 Migrate Ethereum smart contract code by invoking the evmcc. Noting that `To` field is the zero address and the `Data` field is the Ethereum smart contract's bytecode to be migrated.
 
-```
+```shell
 peer chaincode invoke -n evmcc -C <channel-name> -c '{"Args":["0000000000000000000000000000000000000000",<compiled-bytecode>]}' -o <orderer-address> --tls --cafile <orderer-ca>
 ```
 
 ## Test the migrated Ethereum blockchain-based application
 
-1. install the web3
+1. install the web3.
 
-   ```
+   ```shell
    npm install web3@0.20.21
    ```
 
-2. Invoke the migrated blockchain-based application deployed in the blockchain built by HLF
+2. Invoke the migrated blockchain-based application deployed in the blockchain built by HLF.
 
-   ```
+   ```js
    Web3 = require('web3')
    ...
    # port 5000 is exposed by the HLF blockchain network
@@ -106,22 +108,22 @@ peer chaincode invoke -n evmcc -C <channel-name> -c '{"Args":["00000000000000000
 
    If successful you should be able to get your account address. 
 
-   ```
-    > web3.eth.accounts
+   ```shell
+   > web3.eth.accounts
    ```
 
    And you should see a single element array with your account address. In order to run any transactions web3 requires `web3.eth.defaultAccount` to be set
 
-   ```
-    > web3.eth.defaultAccount = web3.eth.accounts[0]
+   ```shell
+   > web3.eth.defaultAccount = web3.eth.accounts[0]
    ```
 
 
 ## Interacting with a previously  migrated Ethereum blockchain-based application
 
-The example is to migrate an application implemented based on a simple smart contract Storage written in Solidity version 0.4.0. The Storage smart contract allows anyone to store a single number in a variable by the set function allows anyone to read the value of the variable by the get function.
+The example is to migrate an application implemented based on a simple smart contract Storage written in Solidity version 0.4.0. The *Storage* smart contract allows anyone to store a single number in a variable by the *set* function allows anyone to read the value of the variable by the *get* function.
 
-   ```
+   ```js
    > simpleStorageABI = [
      	{
      		"constant": false,
