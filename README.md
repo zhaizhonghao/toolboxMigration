@@ -36,9 +36,10 @@ Hence, we designed a toolbox to help developers automatically migrate their appl
 2. Install and instantiate the EVM written in chaincode to the network
 
    the EVM chaincode (evmcc) refer to the [emvcc](https://github.com/zhaizhonghao/toolbox_migration/blob/main/evmcc/evmcc.go). Below is an example of installation and instantiation through the peer cli.
+
    ```shell
- peer chaincode install -n evmcc -l golang -v 0 -p github.com/zhaizhonghao/toolbox_migration/evmcc
-peer chaincode instantiate -n evmcc -v 0 -C <channel-name> -c '{"Args":[]}' -o <orderer-address> --tls --cafile <orderer-ca>
+   peer chaincode install -n evmcc -l golang -v 0 -p github.com/zhaizhonghao/toolbox_migration/evmcc
+   peer chaincode instantiate -n evmcc -v 0 -C <channel-name> -c '{"Args":[]}' -o <orderer-address> --tls --cafile <orderer-ca>
    ```
 
 3. Run the interaction transformer
@@ -60,13 +61,14 @@ peer chaincode instantiate -n evmcc -v 0 -C <channel-name> -c '{"Args":[]}' -o <
    ```
 
    A binary named `fab3 ` will be created in the bin directory. 
-
-
-   To use Fab3, the user needs to provide a Fabric SDK Config and Fabric user information. To specify the Fabric user, the organization and user id needs to be provided which corresponds to the credentials provided in the SDK config. We provide a sample [config](examples/first-network-sdk-config.yaml) that can be used with the first network example from the [fabric-samples](https://github.com/hyperledger/fabric-samples) repository. The credentials specified in the config, are expected to be in the directory format that the [cryptogen](https://hyperledger-fabric.readthedocs.io/en/release-1.4/commands/cryptogen.html) binary outputs.
+   
+   To use Fab3, the user needs to provide a Fabric SDK Config and Fabric user information. To specify the Fabric user, the organization and user id needs to be provided which corresponds to the credentials provided in the SDK config. We provide a sample [config](examples/first-network-sdk-config.yaml) that can be used with the first network example from the [fabric-samples](https://github.com/hyperledger/fabric-samples) repository. The credentials specified in the config, are expected to be in the directory format that the [cryptogen](https://hyperledger-fabric.readthedocs.io/en/release-1.4/commands/cryptogen.html) binary outputs.   
 
 4. migrate Ethereum smart contract code. Noting that `To` field is the zero address and the `Data` field is the Ethereum smart contract's bytecode to be migrated.
 
-   ```shell
+   ```
    peer chaincode invoke -n evmcc -C <channel-name> -c '{"Args":["0000000000000000000000000000000000000000",<compiled-bytecode>]}' -o <orderer-address> --tls --cafile <orderer-ca>
    ```
+   
+   
 
