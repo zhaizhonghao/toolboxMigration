@@ -25,7 +25,7 @@ Hence, we designed a toolbox to help developers automatically migrate their appl
   Integrating the EVM into the HLF platform results in two smart contract deployment methods on the HLF platform.  One is the smart contract deployment method of the Ethereum platform, and the other is the smart contract deployment method of the HLF platform. On the Ethereum platform, any smart contract code of the blockchain-based application is allowed to be deployed without reviewing and testing. The platform relies on the gas fee mechanism to defend against the malicious codes (e.g., codes containing infinite loop) that may stall the platform. On the HLF platform, the gas fee mechanism is removed to reduce the application’s use-cost. The platform relies on mandatory code checks before deploying the smart contract to detect the malicious codes. Suppose the HLF platform integrates the EVM to support the application migration. In that case, attackers can bypass the code checks and inject the malicious codes into the HLF platform by selecting the smart contract deployment method of the Ethereum platform. Without the protection of the gas fee mechanism, any node in the HLF will be stalled by running the malicious codes, thereby destroying the application’s availability. To solve the problem, the toolbox will generates a chaincode and binds it with the migrated smart contract.
   
 
-![image](https://github.com/zhaizhonghao/toolbox_migration/tree/main/images/migration_process.png)
+![image](https://github.com/zhaizhonghao/toolbox_migration/blob/main/images/migration_process.png)
 
 ## 
 
