@@ -64,11 +64,29 @@ Hence, we designed a toolbox to help developers automatically migrate their appl
    
    To use Fab3, the user needs to provide a Fabric SDK Config and Fabric user information. To specify the Fabric user, the organization and user id needs to be provided which corresponds to the credentials provided in the SDK config. We provide a sample [config](examples/first-network-sdk-config.yaml) that can be used with the first network example from the [fabric-samples](https://github.com/hyperledger/fabric-samples) repository. The credentials specified in the config, are expected to be in the directory format that the [cryptogen](https://hyperledger-fabric.readthedocs.io/en/release-1.4/commands/cryptogen.html) binary outputs.   
 
-4. migrate Ethereum smart contract code. Noting that `To` field is the zero address and the `Data` field is the Ethereum smart contract's bytecode to be migrated.
+## Migrate the smart contract code
+
+Migrate Ethereum smart contract code by invoking the evmcc. Noting that `To` field is the zero address and the `Data` field is the Ethereum smart contract's bytecode to be migrated.
+
+```
+peer chaincode invoke -n evmcc -C <channel-name> -c '{"Args":["0000000000000000000000000000000000000000",<compiled-bytecode>]}' -o <orderer-address> --tls --cafile <orderer-ca>
+```
+
+## Test the migrated Ethereum blockchain-based application
+
+1. install the web3
 
    ```
-   peer chaincode invoke -n evmcc -C <channel-name> -c '{"Args":["0000000000000000000000000000000000000000",<compiled-bytecode>]}' -o <orderer-address> --tls --cafile <orderer-ca>
+   npm install web3@0.20.2
    ```
-   
-   
 
+2. Invoke the migrated blockchain-based application deployed in the blockchain built by HLF
+
+   ```js
+   Web3 = require('web3')
+   ...
+   # port 5000 is exposed by the HLF blockchain network
+   web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:5000'))
+   ```
+
+   
