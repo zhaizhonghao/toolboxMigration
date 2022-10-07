@@ -34,3 +34,18 @@ Hence, we designed a toolbox to help developers automatically migrate their appl
    Please refer to [using the fabric test network](https://hyperledger-fabric.readthedocs.io/en/latest/test_network.html) and [deploying a production network](https://hyperledger-fabric.readthedocs.io/en/latest/deployment_guide_overview.html#step-one-decide-on-your-network-configuration)
 
 2. Install and instantiate the EVM written in chaincode to the network
+
+   the EVM chaincode (evmcc) refer to the [emvcc](https://github.com/zhaizhonghao/toolbox_migration/blob/main/evmcc/evmcc.go). Below is an example of installation and instantiation through the peer cli.
+
+   
+```shell
+ peer chaincode install -n evmcc -l golang -v 0 -p github.com/zhaizhonghao/toolbox_migration/evmcc
+ peer chaincode instantiate -n evmcc -v 0 -C <channel-name> -c '{"Args":[]}' -o <orderer-address> --tls --cafile <orderer-ca>
+```
+
+3. migrate Ethereum smart contract code. Noting that `To` field is the zero address and the `Data` field is the Ethereum smart contract's bytecode to be migrated.
+
+```shell
+peer chaincode invoke -n evmcc -C <channel-name> -c '{"Args":["0000000000000000000000000000000000000000",<compiled-bytecode>]}' -o <orderer-address> --tls --cafile <orderer-ca>
+```
+
